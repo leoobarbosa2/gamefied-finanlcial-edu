@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { ArrowLeft } from 'lucide-react'
 import { pathsApi } from '../api/paths'
 import { useAuthStore } from '../store/authStore'
 import PageShell from '../components/layout/PageShell'
@@ -22,6 +24,14 @@ export default function Paths() {
   return (
     <PageShell>
       <div className="flex flex-col gap-6">
+        <Link
+          to="/dashboard"
+          className="inline-flex items-center gap-1.5 text-sm text-[var(--content-muted)] hover:text-[var(--content-primary)] transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Início
+        </Link>
+
         <div>
           <h1 className="text-2xl font-semibold text-[var(--content-primary)]">Trilhas de Aprendizado</h1>
           <p className="mt-1 text-sm text-[var(--content-muted)]">

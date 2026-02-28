@@ -105,17 +105,17 @@
 }
 
 .dark {
-  --surface:           #09090b;
-  --surface-raised:    #18181b;
-  --surface-overlay:   #27272a;
+  --surface:           #16161a;
+  --surface-raised:    #1e1e24;
+  --surface-overlay:   #2a2a32;
 
-  --content-primary:   #fafafa;
+  --content-primary:   #f4f4f5;
   --content-secondary: #d4d4d8;
-  --content-muted:     #71717a;
-  --content-inverse:   #09090b;
+  --content-muted:     #8b8b98;
+  --content-inverse:   #16161a;
 
-  --border:            #27272a;
-  --border-strong:     #3f3f46;
+  --border:            #2a2a32;
+  --border-strong:     #3d3d4a;
 
   --success-subtle:    #052e16;
   --success:           #4ade80;
