@@ -71,11 +71,13 @@ export default function LessonComplete({ lessonTitle, pathSlug, lessonId }: Less
   const estimatedSecs = (lesson?.estimatedMins ?? 3) * 60
 
   const handleDone = async () => {
-    await completeLesson(lessonId)
+    const wasAlreadyCompleted = lesson?.progress?.status === 'COMPLETED'
+    if (!wasAlreadyCompleted) {
+      await completeLesson(lessonId)
+      await queryClient.invalidateQueries({ queryKey: ['daily-limit'] })
+    }
     resetLesson()
-    // Invalidate so PathDetail and TopBar reflect the new COMPLETED status immediately
     await queryClient.invalidateQueries({ queryKey: ['path'] })
-    await queryClient.invalidateQueries({ queryKey: ['daily-limit'] })
     navigate(`/paths/${pathSlug}`)
   }
 

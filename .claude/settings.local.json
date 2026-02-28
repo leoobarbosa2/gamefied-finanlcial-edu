@@ -5,7 +5,17 @@
       "Bash(pnpm install)",
       "Bash(pnpm install -D tailwindcss postcss autoprefixer @tailwindcss/forms @tailwindcss/typography)",
       "Bash(pnpm install -D prettier prettier-plugin-tailwindcss eslint-config-prettier eslint-plugin-prettier @typescript-eslint/parser @typescript-eslint/eslint-plugin)",
-      "Bash(pnpm install react-router-dom @tanstack/react-query axios zustand framer-motion lucide-react clsx tailwind-merge)"
+      "Bash(pnpm install react-router-dom @tanstack/react-query axios zustand framer-motion lucide-react clsx tailwind-merge)",
+      "Bash(docker ps --filter \"name=forum-postgres-db\" --format \"table {{.Names}}\\\\t{{.Status}}\\\\t{{.Ports}}\")",
+      "Bash(docker start forum-postgres-db)",
+      "Bash(netstat -ano)",
+      "Bash(findstr \":5432\")",
+      "Bash(docker ps -a --filter \"expose=5432\" --format \"table {{.Names}}\\\\t{{.Status}}\\\\t{{.Ports}}\")",
+      "Bash(docker ps -a --format \"table {{.Names}}\\\\t{{.Status}}\\\\t{{.Ports}}\")",
+      "Bash(findstr \"5432\")",
+      "Bash(findstr \"POSTGRES\")",
+      "Bash(npx prisma migrate deploy)",
+      "Bash(pnpm db:seed)"
     ]
   }
 }
