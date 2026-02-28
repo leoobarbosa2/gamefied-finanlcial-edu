@@ -18,6 +18,11 @@ export const lessonsApi = {
       .get<ApiResponse<DailyLimitStatus>>(`/lessons/daily-limit`)
       .then((r) => r.data.data),
 
+  buySessions: () =>
+    client
+      .post<ApiResponse<{ newCoins: number; extraSessions: number }>>('/lessons/buy-sessions')
+      .then((r) => r.data.data),
+
   submitAnswer: (
     lessonId: string,
     stepId: string,

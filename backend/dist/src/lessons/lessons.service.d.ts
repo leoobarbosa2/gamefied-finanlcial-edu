@@ -11,8 +11,8 @@ export declare class LessonsService {
         estimatedMins: number;
         path: {
             id: string;
-            title: string;
             slug: string;
+            title: string;
         };
         steps: {
             id: string;
@@ -40,9 +40,24 @@ export declare class LessonsService {
     }>;
     getDailyLimitStatus(userId: string): Promise<{
         used: number;
+        limit: null;
+        canLearn: boolean;
+        resetAt: string;
+        isPro: boolean;
+        coins: number;
+        bonusSessions: number;
+    } | {
+        used: number;
         limit: number;
         canLearn: boolean;
         resetAt: string;
+        isPro: boolean;
+        coins: number;
+        bonusSessions: number;
+    }>;
+    buyExtraSessions(userId: string): Promise<{
+        newCoins: number;
+        extraSessions: number;
     }>;
     completeLesson(lessonId: string, userId: string, dto: CompleteLessonDto): Promise<{
         completed: boolean;

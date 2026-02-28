@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { LogOut, User, Shield } from 'lucide-react'
+import { LogOut, User, Shield, Zap } from 'lucide-react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { cn } from '../../utils/cn'
@@ -9,11 +9,12 @@ import { useAuthStore } from '../../store/authStore'
 import { authApi } from '../../api/auth'
 import { lessonsApi } from '../../api/lessons'
 import CoinsBadge from '../ui/CoinsBadge'
-import LevelBadge from '../ui/LevelBadge'
+import ProBadge from '../ui/ProBadge'
 
 function xpForLevel(n: number) { return n * n * 50 }
 
-function SessionsDots({ used, limit }: { used: number; limit: number }) {
+function SessionsDots({ used, limit }: { used: number; limit: number | null }) {
+  if (limit === null) return null  // PRO: unlimited, no dots needed
   const full = used >= limit
   return (
     <div className="group relative hidden sm:flex items-center gap-1.5">
@@ -136,6 +137,15 @@ export default function TopBar() {
             <SessionsDots used={dailyLimit.used} limit={dailyLimit.limit} />
           )}
           {user && <CoinsBadge coins={user.coins ?? 0} />}
+          {user && (
+            <div className="hidden sm:flex items-center gap-1 rounded-lg border border-accent-500/30 bg-accent-500/10 px-2.5 py-1">
+              <Zap className="h-3 w-3 text-accent-500 fill-accent-500" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-accent-500">Nível</span>
+              <span className="text-sm font-bold leading-none text-accent-600 dark:text-accent-400">
+                {user.level ?? 1}
+              </span>
+            </div>
+          )}
           <ThemeToggle />
 
           {/* Avatar menu */}
@@ -143,14 +153,9 @@ export default function TopBar() {
             <button
               onClick={() => setMenuOpen((v) => !v)}
               aria-label="Abrir menu do perfil"
-              className="relative flex h-8 w-8 items-center justify-center rounded-full bg-accent-100 text-accent-700 text-sm font-semibold dark:bg-accent-900/40 dark:text-accent-300 transition-colors hover:bg-accent-200 dark:hover:bg-accent-800/40"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-100 text-accent-700 text-sm font-semibold dark:bg-accent-900/40 dark:text-accent-300 transition-colors hover:bg-accent-200 dark:hover:bg-accent-800/40"
             >
               {user?.displayName?.[0]?.toUpperCase() ?? 'U'}
-              {user && (
-                <span className="absolute -bottom-0.5 -right-0.5">
-                  <LevelBadge level={user.level ?? 1} />
-                </span>
-              )}
             </button>
 
             {menuOpen && (
@@ -161,13 +166,19 @@ export default function TopBar() {
                 />
                 <div className="absolute right-0 z-50 mt-2 w-52 rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-lg">
                   <div className="border-b border-[var(--border)] px-4 py-3">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <LevelBadge level={user?.level ?? 1} />
+                    <div className="flex items-center gap-2">
                       <p className="text-sm font-medium text-[var(--content-primary)] truncate">
                         {user?.displayName}
                       </p>
+                      {user?.plan === 'PRO' && <ProBadge />}
                     </div>
                     <p className="text-xs text-[var(--content-muted)] truncate">{user?.email}</p>
+                    <div className="mt-1.5 flex items-center gap-1">
+                      <Zap className="h-2.5 w-2.5 text-accent-500 fill-accent-500" />
+                      <span className="text-xs font-semibold text-accent-600 dark:text-accent-400">
+                        Nível {user?.level ?? 1}
+                      </span>
+                    </div>
                   </div>
                   <div className="p-1">
                     <Link

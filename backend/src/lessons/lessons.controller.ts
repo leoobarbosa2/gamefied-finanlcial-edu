@@ -15,6 +15,12 @@ export class LessonsController {
     return this.lessonsService.getDailyLimitStatus(user.id)
   }
 
+  @Post('buy-sessions')
+  @HttpCode(HttpStatus.OK)
+  buySessions(@CurrentUser() user: { id: string }) {
+    return this.lessonsService.buyExtraSessions(user.id)
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string, @CurrentUser() user: { id: string }) {
     return this.lessonsService.findOne(id, user.id)

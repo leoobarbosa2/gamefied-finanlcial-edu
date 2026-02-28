@@ -13,6 +13,7 @@ import Skeleton from '../components/ui/Skeleton'
 import XPBar from '../components/ui/XPBar'
 import CoinsBadge from '../components/ui/CoinsBadge'
 import LevelBadge from '../components/ui/LevelBadge'
+import ProBadge from '../components/ui/ProBadge'
 
 function formatStudyTime(secs: number): string {
   if (secs < 60) return `${secs}s`
@@ -106,6 +107,7 @@ export default function Profile() {
                       {profile?.displayName ?? user?.displayName}
                     </p>
                   </button>
+                  {user?.plan === 'PRO' && <ProBadge size="md" />}
                   <CoinsBadge coins={user?.coins ?? 0} />
                 </div>
                 <p className="text-sm text-[var(--content-muted)]">{profile?.email ?? user?.email}</p>

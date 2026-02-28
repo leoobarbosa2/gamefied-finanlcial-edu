@@ -62,23 +62,29 @@ export default function Dashboard() {
             </div>
             {dailyLimit && (
               <div className="flex items-center gap-1.5">
-                <div className="flex items-center gap-0.5">
-                  {Array.from({ length: dailyLimit.limit }).map((_, i) => (
-                    <span
-                      key={i}
-                      className={`block h-2 w-2 rounded-full ${
-                        i < dailyLimit.used
-                          ? dailyLimit.used >= dailyLimit.limit
-                            ? 'bg-amber-400'
-                            : 'bg-accent-500'
-                          : 'bg-[var(--border-strong)]'
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="text-xs text-[var(--content-muted)]">
-                  {dailyLimit.used}/{dailyLimit.limit} sessões
-                </span>
+                {dailyLimit.isPro ? (
+                  <span className="text-xs text-[var(--content-muted)]">Sessões ilimitadas ✦ PRO</span>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-0.5">
+                      {Array.from({ length: dailyLimit.limit ?? 3 }).map((_, i) => (
+                        <span
+                          key={i}
+                          className={`block h-2 w-2 rounded-full ${
+                            i < dailyLimit.used
+                              ? dailyLimit.used >= (dailyLimit.limit ?? 3)
+                                ? 'bg-amber-400'
+                                : 'bg-accent-500'
+                              : 'bg-[var(--border-strong)]'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-xs text-[var(--content-muted)]">
+                      {dailyLimit.used}/{dailyLimit.limit} sessões
+                    </span>
+                  </>
+                )}
               </div>
             )}
           </div>

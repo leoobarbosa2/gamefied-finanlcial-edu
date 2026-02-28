@@ -189,9 +189,12 @@ export interface AnswerResult {
 
 export interface DailyLimitStatus {
   used: number
-  limit: number
+  limit: number | null  // null = PRO (unlimited)
   canLearn: boolean
   resetAt: string
+  isPro: boolean
+  coins: number
+  bonusSessions: number
 }
 
 // ─── User Metrics ──────────────────────────────────────────────────────────

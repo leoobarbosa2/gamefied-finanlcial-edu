@@ -17,7 +17,15 @@
       "Bash(npx prisma migrate deploy)",
       "Bash(pnpm db:seed)",
       "Bash(npx prisma migrate dev --name add-gamification-fields)",
-      "Bash(npx tsc --noEmit)"
+      "Bash(npx tsc --noEmit)",
+      "Bash(npx prisma migrate dev --name add-bonus-sessions)",
+      "Bash(npm install stripe)",
+      "Bash(pnpm add stripe)",
+      "Bash(npx prisma migrate dev --name add-pro-expires-at)",
+      "Bash(node -e \"const s = require\\(''stripe''\\); console.log\\(Object.keys\\(new s\\(''sk_test_x''\\).subscriptions\\)\\)\")",
+      "Bash(node -e \"const Stripe = require\\(''stripe''\\); const s = new Stripe\\(''x''\\); s.subscriptions.retrieve\\(''sub_x''\\).catch\\(e => console.log\\(e.constructor.name\\)\\)\")",
+      "Bash(cd /c/Users/leona/OneDrive/Área de Trabalho/gamified-financial-edu/backend)",
+      "Bash(npx prisma:*)"
     ]
   }
 }

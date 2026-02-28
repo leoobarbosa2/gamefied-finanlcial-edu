@@ -27,6 +27,9 @@ let LessonsController = class LessonsController {
     getDailyLimit(user) {
         return this.lessonsService.getDailyLimitStatus(user.id);
     }
+    buySessions(user) {
+        return this.lessonsService.buyExtraSessions(user.id);
+    }
     findOne(id, user) {
         return this.lessonsService.findOne(id, user.id);
     }
@@ -48,6 +51,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], LessonsController.prototype, "getDailyLimit", null);
+__decorate([
+    (0, common_1.Post)('buy-sessions'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], LessonsController.prototype, "buySessions", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),

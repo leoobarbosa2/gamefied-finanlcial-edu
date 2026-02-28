@@ -30,10 +30,12 @@ model User {
   dailyGoalMins Int      @default(10)
   role          UserRole @default(STUDENT)
   plan          UserPlan @default(FREE)
-  xp            Int      @default(0)
-  level         Int      @default(1)
-  coins         Int      @default(0)
-  createdAt     DateTime @default(now())
+  xp                Int      @default(0)
+  level             Int      @default(1)
+  coins             Int      @default(0)
+  bonusSessions     Int      @default(0)
+  bonusSessionsDate String?  @db.VarChar(10)
+  createdAt         DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   progress UserProgress[]

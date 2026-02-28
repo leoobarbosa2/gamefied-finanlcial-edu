@@ -91,23 +91,73 @@ export class LessonsService {
     const now = new Date()
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0)
 
-    const used = await this.prisma.userProgress.count({
-      where: {
-        userId,
-        status: 'COMPLETED',
-        completedAt: { gte: todayStart },
-      },
-    })
+    const [used, user] = await Promise.all([
+      this.prisma.userProgress.count({
+        where: { userId, status: 'COMPLETED', completedAt: { gte: todayStart } },
+      }),
+      this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { plan: true, coins: true, bonusSessions: true, bonusSessionsDate: true },
+      }),
+    ])
 
     const tomorrowStart = new Date(todayStart)
     tomorrowStart.setDate(tomorrowStart.getDate() + 1)
+    const resetAt = tomorrowStart.toISOString()
+
+    if (user?.plan === 'PRO') {
+      return {
+        used,
+        limit: null,
+        canLearn: true,
+        resetAt,
+        isPro: true,
+        coins: user.coins,
+        bonusSessions: 0,
+      }
+    }
+
+    const todayStr = todayStart.toISOString().slice(0, 10)
+    const bonusSessions = user?.bonusSessionsDate === todayStr ? (user.bonusSessions ?? 0) : 0
+    const effectiveLimit = LIMIT + bonusSessions
 
     return {
       used,
-      limit: LIMIT,
-      canLearn: used < LIMIT,
-      resetAt: tomorrowStart.toISOString(),
+      limit: effectiveLimit,
+      canLearn: used < effectiveLimit,
+      resetAt,
+      isPro: false,
+      coins: user?.coins ?? 0,
+      bonusSessions,
     }
+  }
+
+  async buyExtraSessions(userId: string) {
+    const COST = 100
+    const BONUS = 3
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { coins: true, bonusSessions: true, bonusSessionsDate: true },
+    })
+    if (!user) throw new NotFoundException('User not found')
+    if (user.coins < COST) throw new BadRequestException('Coins insuficientes')
+
+    const now = new Date()
+    const todayStr = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString().slice(0, 10)
+    const currentBonus = user.bonusSessionsDate === todayStr ? (user.bonusSessions ?? 0) : 0
+
+    const updated = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        coins: { decrement: COST },
+        bonusSessions: currentBonus + BONUS,
+        bonusSessionsDate: todayStr,
+      },
+      select: { coins: true },
+    })
+
+    return { newCoins: updated.coins, extraSessions: BONUS }
   }
 
   async completeLesson(lessonId: string, userId: string, dto: CompleteLessonDto) {

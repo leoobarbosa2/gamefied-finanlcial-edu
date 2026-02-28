@@ -13,6 +13,7 @@ export declare class AuthService {
         refreshToken: string;
         user: {
             id: string;
+            createdAt: Date;
             email: string;
             displayName: string;
             dailyGoalMins: number;
@@ -21,7 +22,6 @@ export declare class AuthService {
             xp: number;
             level: number;
             coins: number;
-            createdAt: Date;
         };
     }>;
     login(dto: LoginDto): Promise<{
@@ -42,6 +42,7 @@ export declare class AuthService {
     }>;
     getMe(userId: string): Promise<{
         id: string;
+        createdAt: Date;
         email: string;
         displayName: string;
         avatarUrl: string | null;
@@ -51,7 +52,6 @@ export declare class AuthService {
         xp: number;
         level: number;
         coins: number;
-        createdAt: Date;
         streak: {
             currentStreak: number;
             longestStreak: number;

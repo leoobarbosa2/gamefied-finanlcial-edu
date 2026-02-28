@@ -1,12 +1,15 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Flame, BookOpen, Clock, Bell, BellOff, Check } from 'lucide-react'
+import { X, Flame, BookOpen, Clock, Bell, BellOff, Check, Coins } from 'lucide-react'
 
 interface DailyLimitDialogProps {
   open: boolean
   onClose: () => void
   resetAt?: string
   currentStreak?: number
+  coins?: number
+  onBuySessions?: () => void
+  isBuyingSessions?: boolean
 }
 
 function formatResetTime(resetAt?: string): string {
@@ -22,7 +25,7 @@ function scheduleNotification(resetAt?: string) {
   if (delayMs <= 0) return
   setTimeout(() => {
     new Notification('Finlearn — Novas sessões disponíveis! 🎓', {
-      body: 'Suas 3 sessões diárias foram renovadas. Continue sua jornada de aprendizado!',
+      body: 'Suas sessões diárias foram renovadas. Continue sua jornada de aprendizado!',
       icon: '/favicon.svg',
     })
   }, delayMs)
@@ -84,14 +87,22 @@ function NotificationButton({ resetAt }: { resetAt?: string }) {
   )
 }
 
-export default function DailyLimitDialog({ open, onClose, resetAt, currentStreak = 0 }: DailyLimitDialogProps) {
+export default function DailyLimitDialog({
+  open,
+  onClose,
+  resetAt,
+  currentStreak = 0,
+  coins = 0,
+  onBuySessions,
+  isBuyingSessions = false,
+}: DailyLimitDialogProps) {
   const isStreak = currentStreak >= 3
+  const canBuyWithCoins = coins >= 100
 
   return (
     <AnimatePresence>
       {open && (
         <>
-          {/* Backdrop */}
           <motion.div
             className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
             initial={{ opacity: 0 }}
@@ -100,7 +111,6 @@ export default function DailyLimitDialog({ open, onClose, resetAt, currentStreak
             onClick={onClose}
           />
 
-          {/* Dialog */}
           <motion.div
             className="fixed inset-x-4 bottom-0 z-50 mx-auto max-w-md pb-6 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:pb-0"
             initial={{ opacity: 0, y: 40, scale: 0.96 }}
@@ -109,10 +119,8 @@ export default function DailyLimitDialog({ open, onClose, resetAt, currentStreak
             transition={{ type: 'spring', stiffness: 400, damping: 32 }}
           >
             <div className="relative rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl overflow-hidden">
-              {/* Top accent bar */}
               <div className={`h-1 w-full ${isStreak ? 'bg-amber-400' : 'bg-accent-500'}`} />
 
-              {/* Close button */}
               <button
                 onClick={onClose}
                 className="absolute right-4 top-4 rounded-lg p-1 text-[var(--content-muted)] hover:bg-[var(--surface-raised)] hover:text-[var(--content-primary)] transition-colors"
@@ -161,7 +169,6 @@ export default function DailyLimitDialog({ open, onClose, resetAt, currentStreak
                   </>
                 )}
 
-                {/* Reset time */}
                 <div className="flex items-center gap-2 rounded-xl bg-[var(--surface-raised)] px-3 py-2.5">
                   <Clock className="h-4 w-4 shrink-0 text-[var(--content-muted)]" />
                   <p className="text-sm text-[var(--content-muted)]">
@@ -172,7 +179,30 @@ export default function DailyLimitDialog({ open, onClose, resetAt, currentStreak
                   </p>
                 </div>
 
-                {/* Notification button */}
+                <button
+                  onClick={onBuySessions}
+                  disabled={!canBuyWithCoins || isBuyingSessions}
+                  className={`flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors active:scale-[0.98] ${
+                    canBuyWithCoins
+                      ? 'border-amber-300 bg-amber-50 hover:bg-amber-100 dark:border-amber-700/50 dark:bg-amber-900/20 dark:hover:bg-amber-900/30'
+                      : 'border-[var(--border)] bg-[var(--surface-raised)] opacity-50 cursor-not-allowed'
+                  }`}
+                >
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/40">
+                    <Coins className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-[var(--content-primary)]">
+                      {isBuyingSessions ? 'Processando…' : 'Usar 100 coins para +3 sessões'}
+                    </p>
+                    <p className="text-xs text-[var(--content-muted)]">
+                      {canBuyWithCoins
+                        ? `Você tem ${coins} coins disponíveis`
+                        : `Você tem ${coins} coins — precisa de 100`}
+                    </p>
+                  </div>
+                </button>
+
                 <NotificationButton resetAt={resetAt} />
 
                 <button

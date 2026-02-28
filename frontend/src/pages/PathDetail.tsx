@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import * as LucideIcons from 'lucide-react'
 import { type LucideProps, ArrowLeft } from 'lucide-react'
 import { pathsApi } from '../api/paths'
@@ -33,7 +33,8 @@ function DynamicIcon({ name, ...props }: { name: string } & LucideProps) {
 
 export default function PathDetail() {
   const { slug } = useParams<{ slug: string }>()
-  const { user } = useAuthStore()
+  const { user, updateUser } = useAuthStore()
+  const queryClient = useQueryClient()
   const [limitDialogOpen, setLimitDialogOpen] = useState(false)
 
   const { data: path, isLoading } = useQuery({
@@ -47,6 +48,15 @@ export default function PathDetail() {
     queryKey: ['daily-limit'],
     queryFn: () => lessonsApi.getDailyLimit(),
     staleTime: 60_000,
+  })
+
+  const buySessionsMutation = useMutation({
+    mutationFn: lessonsApi.buySessions,
+    onSuccess: (data) => {
+      updateUser({ coins: data.newCoins })
+      queryClient.invalidateQueries({ queryKey: ['daily-limit'] })
+      setLimitDialogOpen(false)
+    },
   })
 
   const totalLessons = path?.lessons.length ?? 0
@@ -131,6 +141,9 @@ export default function PathDetail() {
         onClose={() => setLimitDialogOpen(false)}
         resetAt={dailyLimit?.resetAt}
         currentStreak={user?.streak?.currentStreak ?? 0}
+        coins={user?.coins ?? 0}
+        onBuySessions={() => buySessionsMutation.mutate()}
+        isBuyingSessions={buySessionsMutation.isPending}
       />
     </PageShell>
   )

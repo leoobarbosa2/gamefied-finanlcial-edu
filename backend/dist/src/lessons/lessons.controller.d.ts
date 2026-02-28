@@ -8,9 +8,26 @@ export declare class LessonsController {
         id: string;
     }): Promise<{
         used: number;
+        limit: null;
+        canLearn: boolean;
+        resetAt: string;
+        isPro: boolean;
+        coins: number;
+        bonusSessions: number;
+    } | {
+        used: number;
         limit: number;
         canLearn: boolean;
         resetAt: string;
+        isPro: boolean;
+        coins: number;
+        bonusSessions: number;
+    }>;
+    buySessions(user: {
+        id: string;
+    }): Promise<{
+        newCoins: number;
+        extraSessions: number;
     }>;
     findOne(id: string, user: {
         id: string;
@@ -21,8 +38,8 @@ export declare class LessonsController {
         estimatedMins: number;
         path: {
             id: string;
-            title: string;
             slug: string;
+            title: string;
         };
         steps: {
             id: string;

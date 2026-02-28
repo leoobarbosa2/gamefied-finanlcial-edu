@@ -45,7 +45,6 @@ export default function App() {
       <Route path="/paths/:slug" element={<ProtectedRoute><PathDetail /></ProtectedRoute>} />
       <Route path="/lessons/:id" element={<ProtectedRoute><LessonPlayer /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-
       <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
       <Route path="/admin/paths" element={<AdminRoute><AdminPaths /></AdminRoute>} />
       <Route path="/admin/paths/:id" element={<AdminRoute><AdminPathDetail /></AdminRoute>} />
