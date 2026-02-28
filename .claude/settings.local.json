@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm create vite . --template react-ts --yes)",
+      "Bash(pnpm install)",
+      "Bash(pnpm install -D tailwindcss postcss autoprefixer @tailwindcss/forms @tailwindcss/typography)",
+      "Bash(pnpm install -D prettier prettier-plugin-tailwindcss eslint-config-prettier eslint-plugin-prettier @typescript-eslint/parser @typescript-eslint/eslint-plugin)",
+      "Bash(pnpm install react-router-dom @tanstack/react-query axios zustand framer-motion lucide-react clsx tailwind-merge)"
+    ]
+  }
+}
