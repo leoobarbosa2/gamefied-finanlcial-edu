@@ -69,7 +69,7 @@ let AuthService = class AuthService {
                 displayName: dto.displayName,
                 streak: { create: {} },
             },
-            select: { id: true, email: true, displayName: true, dailyGoalMins: true, role: true, plan: true, createdAt: true },
+            select: { id: true, email: true, displayName: true, dailyGoalMins: true, role: true, plan: true, xp: true, level: true, coins: true, createdAt: true },
         });
         const tokens = this.generateTokens(user.id, user.email);
         return { user, ...tokens };
@@ -91,6 +91,9 @@ let AuthService = class AuthService {
                 avatarUrl: user.avatarUrl,
                 role: user.role,
                 plan: user.plan,
+                xp: user.xp,
+                level: user.level,
+                coins: user.coins,
             },
             ...tokens,
         };
@@ -106,6 +109,9 @@ let AuthService = class AuthService {
                 dailyGoalMins: true,
                 role: true,
                 plan: true,
+                xp: true,
+                level: true,
+                coins: true,
                 createdAt: true,
                 streak: {
                     select: { currentStreak: true, longestStreak: true, lastActivityAt: true },

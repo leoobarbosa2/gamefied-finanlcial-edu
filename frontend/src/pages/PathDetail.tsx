@@ -111,14 +111,15 @@ export default function PathDetail() {
           <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-[var(--content-muted)]">
             Lições
           </h2>
-          <div className="flex flex-col gap-2">
-            {path.lessons.map((lesson) => (
+          <div className="flex flex-col">
+            {path.lessons.map((lesson, idx) => (
               <LessonCard
                 key={lesson.id}
                 lesson={lesson}
                 pathSlug={path.slug}
                 dailyLocked={isLimitReached}
                 onDailyLocked={() => setLimitDialogOpen(true)}
+                isLast={idx === path.lessons.length - 1}
               />
             ))}
           </div>

@@ -116,8 +116,10 @@ export class LessonsService {
     })
     if (!existing) throw new BadRequestException('Start the lesson before completing it')
 
+    const isFirstCompletion = existing.status !== 'COMPLETED'
+
     // Check daily limit (skip if already COMPLETED — allowing re-completion)
-    if (existing.status !== 'COMPLETED') {
+    if (isFirstCompletion) {
       const limit = await this.getDailyLimitStatus(userId)
       if (!limit.canLearn) {
         throw new ForbiddenException({ message: 'Limite diário atingido', code: 'DAILY_LIMIT_REACHED' })
@@ -132,18 +134,42 @@ export class LessonsService {
 
     await this.prisma.userProgress.update({
       where: { userId_lessonId: { userId, lessonId } },
-      data: {
-        status: 'COMPLETED',
-        score: dto.score,
-        completedAt,
-        timeSpentSecs,
-      },
+      data: { status: 'COMPLETED', score: dto.score, completedAt, timeSpentSecs },
     })
 
     // Update streak
     await this.updateStreak(userId)
 
-    return { completed: true }
+    // Award XP and Coins only on first completion
+    if (!isFirstCompletion) {
+      return { completed: true, xpEarned: 0, coinsEarned: 0, newXp: 0, newLevel: 1, leveledUp: false }
+    }
+
+    const score = dto.score ?? 0
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { xp: true, level: true, streak: { select: { currentStreak: true } } },
+    })
+    if (!user) return { completed: true, xpEarned: 0, coinsEarned: 0, newXp: 0, newLevel: 1, leveledUp: false }
+
+    const baseXp = 50
+    const scoreBonus = Math.round((score / 100) * 30)
+    const perfectBonus = score === 100 ? 20 : 0
+    const streakBonus = (user.streak?.currentStreak ?? 0) >= 3 ? 10 : 0
+    const xpEarned = baseXp + scoreBonus + perfectBonus + streakBonus
+
+    const coinsEarned = 5 + (score === 100 ? 5 : 0)
+
+    const newXp = user.xp + xpEarned
+    const newLevel = Math.floor(Math.sqrt(newXp / 50)) + 1
+    const leveledUp = newLevel > user.level
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { xp: newXp, level: newLevel, coins: { increment: coinsEarned } },
+    })
+
+    return { completed: true, xpEarned, coinsEarned, newXp, newLevel, leveledUp }
   }
 
   async submitAnswer(lessonId: string, stepId: string, userId: string, dto: SubmitAnswerDto) {

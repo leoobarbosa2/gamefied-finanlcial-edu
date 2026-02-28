@@ -10,6 +10,9 @@ import PageShell from '../components/layout/PageShell'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import Skeleton from '../components/ui/Skeleton'
+import XPBar from '../components/ui/XPBar'
+import CoinsBadge from '../components/ui/CoinsBadge'
+import LevelBadge from '../components/ui/LevelBadge'
 
 function formatStudyTime(secs: number): string {
   if (secs < 60) return `${secs}s`
@@ -51,6 +54,7 @@ export default function Profile() {
   const handleLogout = async () => {
     try { await authApi.logout() } finally {
       logout()
+      queryClient.clear()
       navigate('/login')
     }
   }
@@ -64,8 +68,13 @@ export default function Profile() {
 
         {/* Avatar + name */}
         <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent-100 text-accent-700 text-2xl font-semibold dark:bg-accent-900/40 dark:text-accent-300">
-            {(profile?.displayName ?? user?.displayName ?? 'U')[0].toUpperCase()}
+          <div className="relative shrink-0">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent-100 text-accent-700 text-2xl font-semibold dark:bg-accent-900/40 dark:text-accent-300">
+              {(profile?.displayName ?? user?.displayName ?? 'U')[0].toUpperCase()}
+            </div>
+            <span className="absolute -bottom-0.5 -right-0.5">
+              <LevelBadge level={user?.level ?? 1} size="md" />
+            </span>
           </div>
           <div className="min-w-0 flex-1">
             {editing ? (
@@ -87,17 +96,27 @@ export default function Profile() {
                 </Button>
               </div>
             ) : (
-              <button
-                onClick={() => setEditing(true)}
-                className="text-left group"
-              >
-                <p className="text-lg font-semibold text-[var(--content-primary)] group-hover:text-accent-500 transition-colors">
-                  {profile?.displayName ?? user?.displayName}
-                </p>
+              <div className="flex flex-col gap-0.5">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setEditing(true)}
+                    className="text-left group"
+                  >
+                    <p className="text-lg font-semibold text-[var(--content-primary)] group-hover:text-accent-500 transition-colors">
+                      {profile?.displayName ?? user?.displayName}
+                    </p>
+                  </button>
+                  <CoinsBadge coins={user?.coins ?? 0} />
+                </div>
                 <p className="text-sm text-[var(--content-muted)]">{profile?.email ?? user?.email}</p>
-              </button>
+              </div>
             )}
           </div>
+        </div>
+
+        {/* XP Bar */}
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-raised)] p-4">
+          <XPBar xp={user?.xp ?? 0} level={user?.level ?? 1} />
         </div>
 
         {/* Stats */}

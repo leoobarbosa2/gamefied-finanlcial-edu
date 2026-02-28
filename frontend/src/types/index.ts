@@ -11,6 +11,9 @@ export interface User {
   dailyGoalMins: number
   role: UserRole
   plan: UserPlan
+  xp: number
+  level: number
+  coins: number
   createdAt?: string
   streak?: {
     currentStreak: number
@@ -147,8 +150,24 @@ export interface DashboardData {
     targetMins: number
     completedToday: number
   }
+  gamification: {
+    xp: number
+    level: number
+    coins: number
+  }
   continueLesson: ContinueLesson | null
   recommendedPaths: LearningPath[]
+}
+
+// ─── Gamification ──────────────────────────────────────────────────────────
+
+export interface CompleteLessonResult {
+  completed: boolean
+  xpEarned: number
+  coinsEarned: number
+  newXp: number
+  newLevel: number
+  leveledUp: boolean
 }
 
 // ─── API Response wrapper ──────────────────────────────────────────────────

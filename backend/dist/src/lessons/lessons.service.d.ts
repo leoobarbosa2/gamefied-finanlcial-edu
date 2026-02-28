@@ -11,8 +11,8 @@ export declare class LessonsService {
         estimatedMins: number;
         path: {
             id: string;
-            slug: string;
             title: string;
+            slug: string;
         };
         steps: {
             id: string;
@@ -46,6 +46,11 @@ export declare class LessonsService {
     }>;
     completeLesson(lessonId: string, userId: string, dto: CompleteLessonDto): Promise<{
         completed: boolean;
+        xpEarned: number;
+        coinsEarned: number;
+        newXp: number;
+        newLevel: number;
+        leveledUp: boolean;
     }>;
     submitAnswer(lessonId: string, stepId: string, userId: string, dto: SubmitAnswerDto): Promise<{
         isCorrect: boolean;

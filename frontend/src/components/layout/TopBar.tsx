@@ -1,12 +1,17 @@
 import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { LogOut, User, Shield } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { motion } from 'framer-motion'
 import { cn } from '../../utils/cn'
 import ThemeToggle from './ThemeToggle'
 import { useAuthStore } from '../../store/authStore'
 import { authApi } from '../../api/auth'
 import { lessonsApi } from '../../api/lessons'
+import CoinsBadge from '../ui/CoinsBadge'
+import LevelBadge from '../ui/LevelBadge'
+
+function xpForLevel(n: number) { return n * n * 50 }
 
 function SessionsDots({ used, limit }: { used: number; limit: number }) {
   const full = used >= limit
@@ -48,6 +53,7 @@ const navLinks = [
 export default function TopBar() {
   const { user, logout } = useAuthStore()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [menuOpen, setMenuOpen] = useState(false)
   const isAdmin = user?.role === 'ADMIN'
 
@@ -63,9 +69,17 @@ export default function TopBar() {
       await authApi.logout()
     } finally {
       logout()
+      queryClient.clear()
       navigate('/login')
     }
   }
+
+  // XP strip calculation
+  const xp = user?.xp ?? 0
+  const level = user?.level ?? 1
+  const xpStart = xpForLevel(level - 1)
+  const xpEnd = xpForLevel(level)
+  const xpPercent = Math.min(100, Math.round(((xp - xpStart) / (xpEnd - xpStart)) * 100))
 
   return (
     <header className="fixed inset-x-0 top-0 z-40 h-14 border-b border-[var(--border)] bg-[var(--surface)]/80 backdrop-blur-sm">
@@ -121,6 +135,7 @@ export default function TopBar() {
           {dailyLimit && (
             <SessionsDots used={dailyLimit.used} limit={dailyLimit.limit} />
           )}
+          {user && <CoinsBadge coins={user.coins ?? 0} />}
           <ThemeToggle />
 
           {/* Avatar menu */}
@@ -128,9 +143,14 @@ export default function TopBar() {
             <button
               onClick={() => setMenuOpen((v) => !v)}
               aria-label="Abrir menu do perfil"
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-100 text-accent-700 text-sm font-semibold dark:bg-accent-900/40 dark:text-accent-300 transition-colors hover:bg-accent-200 dark:hover:bg-accent-800/40"
+              className="relative flex h-8 w-8 items-center justify-center rounded-full bg-accent-100 text-accent-700 text-sm font-semibold dark:bg-accent-900/40 dark:text-accent-300 transition-colors hover:bg-accent-200 dark:hover:bg-accent-800/40"
             >
               {user?.displayName?.[0]?.toUpperCase() ?? 'U'}
+              {user && (
+                <span className="absolute -bottom-0.5 -right-0.5">
+                  <LevelBadge level={user.level ?? 1} />
+                </span>
+              )}
             </button>
 
             {menuOpen && (
@@ -139,11 +159,14 @@ export default function TopBar() {
                   className="fixed inset-0 z-40"
                   onClick={() => setMenuOpen(false)}
                 />
-                <div className="absolute right-0 z-50 mt-2 w-48 rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-lg">
+                <div className="absolute right-0 z-50 mt-2 w-52 rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-lg">
                   <div className="border-b border-[var(--border)] px-4 py-3">
-                    <p className="text-sm font-medium text-[var(--content-primary)] truncate">
-                      {user?.displayName}
-                    </p>
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <LevelBadge level={user?.level ?? 1} />
+                      <p className="text-sm font-medium text-[var(--content-primary)] truncate">
+                        {user?.displayName}
+                      </p>
+                    </div>
                     <p className="text-xs text-[var(--content-muted)] truncate">{user?.email}</p>
                   </div>
                   <div className="p-1">
@@ -179,6 +202,18 @@ export default function TopBar() {
           </div>
         </div>
       </div>
+
+      {/* XP progress strip at bottom of header */}
+      {user && (
+        <div className="absolute bottom-0 inset-x-0 h-0.5 bg-[var(--border)]">
+          <motion.div
+            className="h-full bg-accent-500"
+            initial={{ width: 0 }}
+            animate={{ width: `${xpPercent}%` }}
+            transition={{ duration: 1, ease: 'easeOut' }}
+          />
+        </div>
+      )}
     </header>
   )
 }

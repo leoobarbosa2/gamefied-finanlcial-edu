@@ -16,6 +16,11 @@ export declare class DashboardController {
             targetMins: number;
             completedToday: number;
         };
+        gamification: {
+            xp: number;
+            level: number;
+            coins: number;
+        };
         continueLesson: {
             lessonId: string;
             lessonTitle: string;

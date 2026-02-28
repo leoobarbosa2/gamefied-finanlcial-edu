@@ -1,5 +1,5 @@
 import client from './client'
-import type { Lesson, AnswerResult, DailyLimitStatus, ApiResponse } from '../types'
+import type { Lesson, AnswerResult, DailyLimitStatus, CompleteLessonResult, ApiResponse } from '../types'
 
 export const lessonsApi = {
   getOne: (id: string) =>
@@ -10,7 +10,7 @@ export const lessonsApi = {
 
   complete: (id: string, score?: number) =>
     client
-      .post<ApiResponse<{ completed: boolean }>>(`/lessons/${id}/complete`, { score })
+      .post<ApiResponse<CompleteLessonResult>>(`/lessons/${id}/complete`, { score })
       .then((r) => r.data.data),
 
   getDailyLimit: () =>

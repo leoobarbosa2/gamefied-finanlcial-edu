@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Lesson, LessonStep, AnswerResult } from '../types'
+import type { Lesson, LessonStep, AnswerResult, CompleteLessonResult } from '../types'
 import { lessonsApi } from '../api/lessons'
 
 export type PlayerStatus = 'idle' | 'active' | 'checking' | 'correct' | 'incorrect' | 'complete'
@@ -26,7 +26,7 @@ interface LessonState {
   selectOption: (optionId: string) => void
   submitAnswer: (lessonId: string, stepId: string, questionId: string) => Promise<void>
   advanceStep: () => void
-  completeLesson: (lessonId: string) => Promise<void>
+  completeLesson: (lessonId: string) => Promise<CompleteLessonResult | null>
   resetLesson: () => void
 }
 
@@ -109,9 +109,10 @@ export const useLessonStore = create<LessonState>((set, get) => ({
     const score = quizSteps > 0 ? Math.round((correctCount / quizSteps) * 100) : 100
 
     try {
-      await lessonsApi.complete(lessonId, score)
+      return await lessonsApi.complete(lessonId, score)
     } catch (e) {
       console.error('Failed to mark lesson complete', e)
+      return null
     }
   },
 

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Clock, CheckCircle2, Circle, PlayCircle } from 'lucide-react'
+import { Clock, CheckCircle2, Circle } from 'lucide-react'
 import type { LessonSummary, ProgressStatus } from '../../types'
 import { cn } from '../../utils/cn'
 
@@ -8,27 +8,47 @@ interface LessonCardProps {
   pathSlug: string
   dailyLocked?: boolean
   onDailyLocked?: () => void
+  isLast?: boolean
 }
 
-const statusConfig: Record<ProgressStatus, { icon: typeof CheckCircle2; className: string }> = {
-  COMPLETED: { icon: CheckCircle2, className: 'text-accent-500' },
-  IN_PROGRESS: { icon: PlayCircle, className: 'text-amber-500' },
-  NOT_STARTED: { icon: Circle, className: 'text-[var(--border-strong)]' },
+function StatusDot({ status }: { status: ProgressStatus }) {
+  if (status === 'COMPLETED') {
+    return <CheckCircle2 className="h-5 w-5 text-accent-500 shrink-0" />
+  }
+  if (status === 'IN_PROGRESS') {
+    return (
+      <span className="relative flex h-5 w-5 shrink-0 items-center justify-center">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-400 opacity-50" />
+        <span className="relative h-3 w-3 rounded-full bg-accent-500" />
+      </span>
+    )
+  }
+  return <Circle className="h-5 w-5 text-[var(--border-strong)] shrink-0" />
 }
 
-const cardClass = 'flex items-center gap-4 rounded-xl border border-[var(--border)] p-4 transition-colors hover:bg-[var(--surface-raised)] w-full text-left'
+const cardBase = 'flex items-center gap-4 rounded-xl border p-4 transition-colors w-full text-left'
 
-export default function LessonCard({ lesson, onDailyLocked, dailyLocked }: LessonCardProps) {
-  const config = statusConfig[lesson.status]
-  const StatusIcon = config.icon
+const statusCardClass: Record<ProgressStatus, string> = {
+  COMPLETED: `${cardBase} border-[var(--border)] hover:bg-[var(--surface-raised)]`,
+  IN_PROGRESS: `${cardBase} border-accent-500/40 bg-accent-50/50 dark:bg-accent-900/10 hover:bg-accent-50 dark:hover:bg-accent-900/20`,
+  NOT_STARTED: `${cardBase} border-[var(--border)] hover:bg-[var(--surface-raised)]`,
+}
 
+export default function LessonCard({ lesson, onDailyLocked, dailyLocked, isLast }: LessonCardProps) {
   const inner = (
     <>
       <div className="flex h-8 w-8 shrink-0 items-center justify-center">
-        <StatusIcon className={cn('h-5 w-5', config.className)} />
+        <StatusDot status={lesson.status} />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="font-medium text-[var(--content-primary)] truncate">{lesson.title}</p>
+        <p className={cn(
+          'font-medium truncate',
+          lesson.status === 'NOT_STARTED'
+            ? 'text-[var(--content-muted)]'
+            : 'text-[var(--content-primary)]'
+        )}>
+          {lesson.title}
+        </p>
         {lesson.description && (
           <p className="mt-0.5 text-sm text-[var(--content-muted)] truncate">{lesson.description}</p>
         )}
@@ -40,17 +60,23 @@ export default function LessonCard({ lesson, onDailyLocked, dailyLocked }: Lesso
     </>
   )
 
-  if (dailyLocked && lesson.status !== 'COMPLETED') {
-    return (
-      <button onClick={onDailyLocked} className={cardClass}>
-        {inner}
-      </button>
-    )
-  }
+  const cardClass = statusCardClass[lesson.status]
 
   return (
-    <Link to={`/lessons/${lesson.id}`} className={cardClass}>
-      {inner}
-    </Link>
+    <div className="flex flex-col">
+      {dailyLocked && lesson.status !== 'COMPLETED' ? (
+        <button onClick={onDailyLocked} className={cardClass}>
+          {inner}
+        </button>
+      ) : (
+        <Link to={`/lessons/${lesson.id}`} className={cardClass}>
+          {inner}
+        </Link>
+      )}
+      {/* Vertical connector */}
+      {!isLast && (
+        <div className="ml-[1.875rem] w-px h-2 bg-[var(--border)]" />
+      )}
+    </div>
   )
 }

@@ -15,7 +15,9 @@
       "Bash(findstr \"5432\")",
       "Bash(findstr \"POSTGRES\")",
       "Bash(npx prisma migrate deploy)",
-      "Bash(pnpm db:seed)"
+      "Bash(pnpm db:seed)",
+      "Bash(npx prisma migrate dev --name add-gamification-fields)",
+      "Bash(npx tsc --noEmit)"
     ]
   }
 }

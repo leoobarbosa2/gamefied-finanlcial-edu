@@ -21,8 +21,8 @@ export declare class LessonsController {
         estimatedMins: number;
         path: {
             id: string;
-            slug: string;
             title: string;
+            slug: string;
         };
         steps: {
             id: string;
@@ -54,6 +54,11 @@ export declare class LessonsController {
         id: string;
     }, dto: CompleteLessonDto): Promise<{
         completed: boolean;
+        xpEarned: number;
+        coinsEarned: number;
+        newXp: number;
+        newLevel: number;
+        leveledUp: boolean;
     }>;
     submitAnswer(id: string, stepId: string, user: {
         id: string;

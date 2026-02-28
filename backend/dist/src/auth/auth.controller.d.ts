@@ -8,12 +8,15 @@ export declare class AuthController {
     register(dto: RegisterDto, res: Response): Promise<{
         user: {
             id: string;
-            createdAt: Date;
             email: string;
             displayName: string;
             dailyGoalMins: number;
             role: import("@prisma/client").$Enums.UserRole;
             plan: import("@prisma/client").$Enums.UserPlan;
+            xp: number;
+            level: number;
+            coins: number;
+            createdAt: Date;
         };
         accessToken: string;
     }>;
@@ -26,6 +29,9 @@ export declare class AuthController {
             avatarUrl: string | null;
             role: import("@prisma/client").$Enums.UserRole;
             plan: import("@prisma/client").$Enums.UserPlan;
+            xp: number;
+            level: number;
+            coins: number;
         };
         accessToken: string;
     }>;
@@ -43,13 +49,16 @@ export declare class AuthController {
         id: string;
     }): Promise<{
         id: string;
-        createdAt: Date;
         email: string;
         displayName: string;
         avatarUrl: string | null;
         dailyGoalMins: number;
         role: import("@prisma/client").$Enums.UserRole;
         plan: import("@prisma/client").$Enums.UserPlan;
+        xp: number;
+        level: number;
+        coins: number;
+        createdAt: Date;
         streak: {
             currentStreak: number;
             longestStreak: number;

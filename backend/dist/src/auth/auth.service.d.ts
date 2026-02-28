@@ -13,12 +13,15 @@ export declare class AuthService {
         refreshToken: string;
         user: {
             id: string;
-            createdAt: Date;
             email: string;
             displayName: string;
             dailyGoalMins: number;
             role: import("@prisma/client").$Enums.UserRole;
             plan: import("@prisma/client").$Enums.UserPlan;
+            xp: number;
+            level: number;
+            coins: number;
+            createdAt: Date;
         };
     }>;
     login(dto: LoginDto): Promise<{
@@ -32,17 +35,23 @@ export declare class AuthService {
             avatarUrl: string | null;
             role: import("@prisma/client").$Enums.UserRole;
             plan: import("@prisma/client").$Enums.UserPlan;
+            xp: number;
+            level: number;
+            coins: number;
         };
     }>;
     getMe(userId: string): Promise<{
         id: string;
-        createdAt: Date;
         email: string;
         displayName: string;
         avatarUrl: string | null;
         dailyGoalMins: number;
         role: import("@prisma/client").$Enums.UserRole;
         plan: import("@prisma/client").$Enums.UserPlan;
+        xp: number;
+        level: number;
+        coins: number;
+        createdAt: Date;
         streak: {
             currentStreak: number;
             longestStreak: number;

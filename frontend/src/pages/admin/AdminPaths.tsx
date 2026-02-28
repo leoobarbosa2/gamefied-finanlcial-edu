@@ -31,15 +31,27 @@ function PathFormModal({
   onSave,
   onClose,
   saving,
+  isEdit = false,
 }: {
   initial?: Partial<PathFormData>
   onSave: (data: PathFormData) => void
   onClose: () => void
   saving: boolean
+  isEdit?: boolean
 }) {
   const [form, setForm] = useState<PathFormData>({ ...defaultForm, ...initial })
   const set = (k: keyof PathFormData, v: string | boolean) =>
     setForm((f) => ({ ...f, [k]: v }))
+
+  const handleSave = () => {
+    if (isEdit) {
+      // Only send fields accepted by UpdatePathDto — strip id, slug, totalLessons, orderIndex, etc.
+      const { title, description, iconName, colorToken, isPremium, isPublished } = form
+      onSave({ title, description, iconName, colorToken, isPremium, isPublished } as unknown as PathFormData)
+    } else {
+      onSave(form)
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
@@ -58,11 +70,14 @@ function PathFormModal({
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-[var(--content-muted)]">Slug</label>
+            <label className="mb-1 block text-xs text-[var(--content-muted)]">
+              Slug{isEdit && <span className="ml-1 text-[var(--content-muted)] font-normal">(não editável)</span>}
+            </label>
             <input
-              className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--content-primary)] focus:outline-none focus:ring-2 focus:ring-accent-500"
+              className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--content-primary)] focus:outline-none focus:ring-2 focus:ring-accent-500 disabled:opacity-50 disabled:cursor-not-allowed"
               value={form.slug}
               onChange={(e) => set('slug', e.target.value)}
+              disabled={isEdit}
             />
           </div>
           <div>
@@ -120,8 +135,8 @@ function PathFormModal({
         </div>
         <div className="mt-5 flex gap-2">
           <button
-            onClick={() => onSave(form)}
-            disabled={saving || !form.title || !form.slug}
+            onClick={handleSave}
+            disabled={saving || !form.title || (!isEdit && !form.slug)}
             className="flex-1 rounded-xl bg-accent-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
           >
             {saving ? 'Salvando…' : 'Salvar'}
@@ -274,6 +289,7 @@ export default function AdminPaths() {
           onSave={(data) => updateMutation.mutate({ id: editing.id, data })}
           onClose={() => setEditing(null)}
           saving={updateMutation.isPending}
+          isEdit
         />
       )}
     </PageShell>

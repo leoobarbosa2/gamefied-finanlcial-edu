@@ -24,7 +24,7 @@ let DashboardService = class DashboardService {
         const [user, streakData, paths] = await Promise.all([
             this.prisma.user.findUnique({
                 where: { id: userId },
-                select: { displayName: true, dailyGoalMins: true },
+                select: { displayName: true, dailyGoalMins: true, xp: true, level: true, coins: true },
             }),
             this.progressService.getStreak(userId),
             this.prisma.learningPath.findMany({
@@ -73,6 +73,11 @@ let DashboardService = class DashboardService {
             dailyGoal: {
                 targetMins: user?.dailyGoalMins ?? 10,
                 completedToday,
+            },
+            gamification: {
+                xp: user?.xp ?? 0,
+                level: user?.level ?? 1,
+                coins: user?.coins ?? 0,
             },
             continueLesson,
             recommendedPaths,
