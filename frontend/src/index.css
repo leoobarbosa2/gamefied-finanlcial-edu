@@ -1,6 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
+/* Use .dark class (not prefers-color-scheme) for dark: variants */
+@variant dark (&:where(.dark, .dark *));
+
 @plugin "@tailwindcss/forms";
 @plugin "@tailwindcss/typography";
 
@@ -105,9 +108,9 @@
 }
 
 .dark {
-  --surface:           #16161a;
-  --surface-raised:    #1e1e24;
-  --surface-overlay:   #2a2a32;
+  --surface:           #1c1c22;
+  --surface-raised:    #24242c;
+  --surface-overlay:   #2e2e38;
 
   --content-primary:   #f4f4f5;
   --content-secondary: #d4d4d8;
