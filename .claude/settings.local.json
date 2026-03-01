@@ -25,7 +25,23 @@
       "Bash(node -e \"const s = require\\(''stripe''\\); console.log\\(Object.keys\\(new s\\(''sk_test_x''\\).subscriptions\\)\\)\")",
       "Bash(node -e \"const Stripe = require\\(''stripe''\\); const s = new Stripe\\(''x''\\); s.subscriptions.retrieve\\(''sub_x''\\).catch\\(e => console.log\\(e.constructor.name\\)\\)\")",
       "Bash(cd /c/Users/leona/OneDrive/Área de Trabalho/gamified-financial-edu/backend)",
-      "Bash(npx prisma:*)"
+      "Bash(npx prisma:*)",
+      "Bash(npx create-expo-app@latest mobile --template blank-typescript)",
+      "Bash(npx expo install expo-router expo-constants expo-linking expo-status-bar expo-splash-screen react-native-safe-area-context react-native-screens react-native-gesture-handler react-native-reanimated)",
+      "Bash(npm install nativewind@4 tailwindcss@3 --save-dev)",
+      "Bash(npm install clsx tailwind-merge)",
+      "Bash(npm install nativewind@4 tailwindcss@3 --save-dev --legacy-peer-deps)",
+      "Bash(npm install clsx tailwind-merge --legacy-peer-deps)",
+      "Bash(npx expo install @react-native-async-storage/async-storage expo-secure-store)",
+      "Bash(npm install axios zustand @tanstack/react-query --legacy-peer-deps)",
+      "Bash(npm install lucide-react-native react-native-svg --legacy-peer-deps)",
+      "Bash(npx expo install expo-av expo-notifications)",
+      "Bash(npx expo install expo-notifications)",
+      "Bash(npm install expo-notifications --legacy-peer-deps)",
+      "Bash(node -e \"const pkg = require\\(''./package.json''\\); console.log\\(''expo-notifications:'', pkg.dependencies[''expo-notifications''] || ''NOT INSTALLED''\\)\")",
+      "WebFetch(domain:expo.dev)",
+      "WebFetch(domain:docs.expo.dev)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ]
   }
 }
