@@ -10,10 +10,12 @@ const SECURE_REFRESH_KEY = 'finlearn_refresh_token'
 interface AuthState {
   user: User | null
   isAuthenticated: boolean
+  _hasHydrated: boolean
 
   setAuth: (user: User, accessToken: string, refreshToken: string) => Promise<void>
   updateUser: (updates: Partial<User>) => void
   logout: () => Promise<void>
+  setHasHydrated: (v: boolean) => void
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -21,6 +23,8 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       isAuthenticated: false,
+      _hasHydrated: false,
+      setHasHydrated: (v) => set({ _hasHydrated: v }),
 
       setAuth: async (user, accessToken, refreshToken) => {
         await SecureStore.setItemAsync(SECURE_TOKEN_KEY, accessToken)
@@ -48,6 +52,9 @@ export const useAuthStore = create<AuthState>()(
         user: state.user,
         isAuthenticated: state.isAuthenticated,
       }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true)
+      },
     }
   )
 )

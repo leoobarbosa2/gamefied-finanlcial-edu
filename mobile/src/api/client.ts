@@ -4,6 +4,7 @@ import { getAccessToken, getRefreshToken, setAccessToken, clearTokens } from '..
 const client = axios.create({
   baseURL: process.env.EXPO_PUBLIC_API_URL ?? 'http://10.0.2.2:3000/api/v1',
   headers: { 'Content-Type': 'application/json' },
+  timeout: 10_000, // 10s — prevents infinite loading when backend is unreachable
   // withCredentials not needed — cookies are handled manually via SecureStore
 })
 
