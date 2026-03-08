@@ -11,8 +11,8 @@ export declare class LessonsService {
         estimatedMins: number;
         path: {
             id: string;
-            slug: string;
             title: string;
+            slug: string;
         };
         steps: {
             id: string;

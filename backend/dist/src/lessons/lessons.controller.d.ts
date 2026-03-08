@@ -38,8 +38,8 @@ export declare class LessonsController {
         estimatedMins: number;
         path: {
             id: string;
-            slug: string;
             title: string;
+            slug: string;
         };
         steps: {
             id: string;

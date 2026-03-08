@@ -31,19 +31,23 @@ function AppSplash({ onFinish }: { onFinish: () => void }) {
 
     Animated.timing(taglineOpacity, { toValue: 1, duration: 400, delay: 550, easing: Easing.out(Easing.quad), useNativeDriver: true }).start()
 
-    // Fixed timer — no dependency on any app state
-    const timer = setTimeout(() => {
+    // Two timers: one starts the fade, one calls onFinish after fade completes
+    // Avoids depending on animation callback (which returns finished=false in StrictMode dev)
+    const fadeTimer  = setTimeout(() => {
       Animated.timing(splashOpacity, {
         toValue: 0,
         duration: FADE_DURATION,
         easing: Easing.out(Easing.quad),
         useNativeDriver: true,
-      }).start(({ finished }) => {
-        if (finished) onFinish()
-      })
+      }).start()
     }, SPLASH_DURATION)
 
-    return () => clearTimeout(timer)
+    const doneTimer = setTimeout(onFinish, SPLASH_DURATION + FADE_DURATION)
+
+    return () => {
+      clearTimeout(fadeTimer)
+      clearTimeout(doneTimer)
+    }
   }, [])
 
   return (
