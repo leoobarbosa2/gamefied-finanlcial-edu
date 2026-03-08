@@ -1,14 +1,13 @@
-import React from 'react'
-import { ScrollView, View, Text, RefreshControl } from 'react-native'
+import React, { useState } from 'react'
+import { ScrollView, View, Text, RefreshControl, TouchableOpacity, Appearance, useColorScheme } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { useQuery } from '@tanstack/react-query'
+import { Moon, Sun } from 'lucide-react-native'
 import { dashboardApi } from '../../src/api/dashboard'
+import { lessonsApi } from '../../src/api/lessons'
 import { useAuthStore } from '../../src/store/authStore'
 import { XPBar } from '../../src/components/ui/XPBar'
-import { CoinsBadge } from '../../src/components/ui/CoinsBadge'
-import { LevelBadge } from '../../src/components/ui/LevelBadge'
-import { ProBadge } from '../../src/components/ui/ProBadge'
 import { Skeleton } from '../../src/components/ui/Skeleton'
 import { WeeklyActivity } from '../../src/components/dashboard/WeeklyActivity'
 import { ContinueCard } from '../../src/components/dashboard/ContinueCard'
@@ -17,89 +16,177 @@ import { PathCard } from '../../src/components/dashboard/PathCard'
 export default function Dashboard() {
   const router = useRouter()
   const user = useAuthStore((s) => s.user)
+  const scheme = useColorScheme()
+  const isDark = scheme === 'dark'
 
-  const { data, isLoading, refetch, isRefetching } = useQuery({
+  const [isManualRefreshing, setIsManualRefreshing] = useState(false)
+
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ['dashboard'],
     queryFn: dashboardApi.get,
     staleTime: 30_000,
   })
 
+  const handleManualRefresh = async () => {
+    setIsManualRefreshing(true)
+    await refetch()
+    setIsManualRefreshing(false)
+  }
+
+  const { data: limitData } = useQuery({
+    queryKey: ['dailyLimit'],
+    queryFn: lessonsApi.getDailyLimit,
+    staleTime: 30_000,
+  })
+
+  const firstName = user?.displayName?.split(' ')[0] ?? ''
+  const initial = user?.displayName?.charAt(0).toUpperCase() ?? '?'
+  const coins = data?.gamification?.coins ?? user?.coins ?? 0
+  const sessionsUsed = limitData?.used ?? 0
+  const sessionsLimit = limitData?.limit ?? 3
+  const isPro = limitData?.isPro ?? user?.plan === 'PRO'
+
+  const c = {
+    bg: isDark ? '#1c1c22' : '#f9fafb',
+    surface: isDark ? '#24242c' : '#ffffff',
+    border: isDark ? '#2a2a32' : '#e4e4e7',
+    textPrimary: isDark ? '#f4f4f5' : '#09090b',
+    textMuted: isDark ? '#8b8b98' : '#71717a',
+    dotEmpty: isDark ? '#3d3d4a' : '#e4e4e7',
+  }
+
   return (
-    <SafeAreaView className="flex-1 bg-[#f9fafb] dark:bg-[#1c1c22]" edges={['top']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: c.bg }} edges={['top']}>
+      {/* Top nav */}
+      <View style={{
+        flexDirection: 'row', alignItems: 'center',
+        paddingHorizontal: 16, paddingVertical: 12,
+        backgroundColor: c.surface,
+        borderBottomWidth: 1, borderBottomColor: c.border,
+      }}>
+        <Text style={{ flex: 1, fontSize: 20, fontWeight: '800', color: c.textPrimary }}>
+          Finlearn
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginRight: 12 }}>
+          <Text style={{ fontSize: 15 }}>🪙</Text>
+          <Text style={{ fontSize: 14, fontWeight: '700', color: '#f59e0b' }}>{coins}</Text>
+        </View>
+        <TouchableOpacity
+          onPress={() => Appearance.setColorScheme(isDark ? 'light' : 'dark')}
+          style={{ marginRight: 12, padding: 4 }}
+        >
+          {isDark ? <Sun size={20} color="#8b8b98" /> : <Moon size={20} color="#71717a" />}
+        </TouchableOpacity>
+        <View style={{
+          width: 34, height: 34, borderRadius: 17,
+          backgroundColor: '#14b8a6',
+          alignItems: 'center', justifyContent: 'center',
+        }}>
+          <Text style={{ color: '#fff', fontSize: 14, fontWeight: '700' }}>{initial}</Text>
+        </View>
+      </View>
+
       <ScrollView
-        refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
-        }
-        contentContainerStyle={{ paddingBottom: 24 }}
+        refreshControl={<RefreshControl refreshing={isManualRefreshing} onRefresh={handleManualRefresh} />}
+        contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <View className="px-4 pt-4 pb-3 bg-white dark:bg-[#1c1c22] border-b border-[#e4e4e7] dark:border-[#2a2a32]">
-          <View className="flex-row items-center justify-between mb-3">
-            <View className="flex-1">
-              <Text className="text-xs text-[#71717a] dark:text-[#8b8b98] mb-0.5">
-                {isLoading ? '...' : (data?.greeting ?? 'Olá')}
+        {/* Stats card */}
+        {isLoading ? (
+          <Skeleton className="h-40 rounded-2xl mb-5" />
+        ) : (
+          <View style={{
+            backgroundColor: c.surface,
+            borderRadius: 16, padding: 16,
+            borderWidth: 1, borderColor: c.border,
+            marginBottom: 20,
+          }}>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 4 }}>
+              <Text style={{ fontSize: 18, fontWeight: '800', color: c.textPrimary, flex: 1 }}>
+                Olá, {firstName}
               </Text>
-              <View className="flex-row items-center gap-2">
-                <Text className="text-xl font-bold text-[#09090b] dark:text-[#f4f4f5]">
-                  {user?.displayName ?? ''}
-                </Text>
-                {user?.plan === 'PRO' && <ProBadge />}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, marginLeft: 8 }}>
+                <Text style={{ fontSize: 14 }}>🪙</Text>
+                <Text style={{ fontSize: 14, fontWeight: '700', color: '#f59e0b' }}>{coins}</Text>
               </View>
             </View>
-            <View className="flex-row items-center gap-2">
-              {data && <CoinsBadge coins={data.gamification.coins} />}
-              {user && <LevelBadge level={user.level} />}
+
+            <Text style={{ fontSize: 13, color: c.textMuted, marginBottom: 14 }}>
+              Pronto para a próxima lição?
+            </Text>
+
+            {/* Streak + sessions */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 14 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <Text style={{ fontSize: 15 }}>🔥</Text>
+                <Text style={{ fontSize: 13, fontWeight: '600', color: c.textPrimary }}>
+                  {data?.streak?.currentStreak ?? 0} {data?.streak?.currentStreak === 1 ? 'dia' : 'dias'}
+                </Text>
+              </View>
+              {!isPro && (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  {Array.from({ length: sessionsLimit }).map((_, i) => (
+                    <View key={i} style={{
+                      width: 8, height: 8, borderRadius: 4,
+                      backgroundColor: i < sessionsUsed ? '#14b8a6' : c.dotEmpty,
+                    }} />
+                  ))}
+                  <Text style={{ fontSize: 12, color: c.textMuted }}>
+                    {sessionsUsed}/{sessionsLimit} sessões
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            {user && <XPBar xp={user.xp} level={user.level} />}
+          </View>
+        )}
+
+        {/* Esta semana */}
+        {isLoading && <Skeleton className="h-24 rounded-2xl mb-5" />}
+        {!isLoading && data?.streak && (
+          <View style={{ marginBottom: 20 }}>
+            <Text style={{ fontSize: 11, fontWeight: '700', color: c.textMuted, letterSpacing: 0.8, marginBottom: 10, textTransform: 'uppercase' }}>
+              Esta semana
+            </Text>
+            <WeeklyActivity streak={data.streak} />
+          </View>
+        )}
+
+        {/* Continue */}
+        {data?.continueLesson && (
+          <View style={{ marginBottom: 20 }}>
+            <Text style={{ fontSize: 11, fontWeight: '700', color: c.textMuted, letterSpacing: 0.8, marginBottom: 10, textTransform: 'uppercase' }}>
+              Continue de onde parou
+            </Text>
+            <ContinueCard lesson={data.continueLesson} />
+          </View>
+        )}
+
+        {/* Suas trilhas */}
+        {isLoading && (
+          <View style={{ gap: 12 }}>
+            <Skeleton className="h-5 w-24 rounded mb-2" />
+            <Skeleton className="h-20 rounded-2xl" />
+            <Skeleton className="h-20 rounded-2xl" />
+          </View>
+        )}
+        {(data?.recommendedPaths?.length ?? 0) > 0 && (
+          <View>
+            <Text style={{ fontSize: 11, fontWeight: '700', color: c.textMuted, letterSpacing: 0.8, marginBottom: 10, textTransform: 'uppercase' }}>
+              Suas trilhas
+            </Text>
+            <View style={{ gap: 12 }}>
+              {data!.recommendedPaths.map((path) => (
+                <PathCard
+                  key={path.id}
+                  path={path}
+                  onPress={() => router.push(`/(app)/paths/${path.slug}`)}
+                />
+              ))}
             </View>
           </View>
-
-          {/* XP Bar */}
-          {user && (
-            <XPBar xp={user.xp} level={user.level} />
-          )}
-        </View>
-
-        <View className="px-4 pt-4 gap-4">
-          {/* Continue learning */}
-          {isLoading && (
-            <Skeleton className="h-28 rounded-2xl" />
-          )}
-          {data?.continueLesson && (
-            <ContinueCard lesson={data.continueLesson} />
-          )}
-
-          {/* Weekly activity */}
-          {isLoading ? (
-            <Skeleton className="h-28 rounded-2xl" />
-          ) : data?.streak ? (
-            <WeeklyActivity streak={data.streak} />
-          ) : null}
-
-          {/* Recommended paths */}
-          {(data?.recommendedPaths?.length ?? 0) > 0 && (
-            <View>
-              <Text className="text-sm font-semibold text-[#3f3f46] dark:text-[#d4d4d8] mb-3">
-                Trilhas recomendadas
-              </Text>
-              <View className="gap-3">
-                {data!.recommendedPaths.map((path) => (
-                  <PathCard
-                    key={path.id}
-                    path={path}
-                    onPress={() => router.push(`/(app)/paths/${path.slug}`)}
-                  />
-                ))}
-              </View>
-            </View>
-          )}
-
-          {isLoading && (
-            <View className="gap-3">
-              <Skeleton className="h-20 rounded-2xl" />
-              <Skeleton className="h-20 rounded-2xl" />
-            </View>
-          )}
-        </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   )

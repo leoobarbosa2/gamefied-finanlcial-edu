@@ -1,44 +1,52 @@
 import React from 'react'
-import { View, Text } from 'react-native'
+import { View, Text, useColorScheme } from 'react-native'
 import { Flame } from 'lucide-react-native'
 import type { StreakData } from '../../types'
 
-const DAY_LABELS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
+const DAY_LABELS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
 
 interface WeeklyActivityProps {
   streak: StreakData
 }
 
 export function WeeklyActivity({ streak }: WeeklyActivityProps) {
-  return (
-    <View className="bg-white dark:bg-[#24242c] rounded-2xl border border-[#e4e4e7] dark:border-[#2a2a32] p-4">
-      <View className="flex-row items-center justify-between mb-3">
-        <Text className="text-sm font-semibold text-[#09090b] dark:text-[#f4f4f5]">
-          Atividade semanal
-        </Text>
-        <View className="flex-row items-center gap-1">
-          <Flame size={14} color="#f97316" fill="#f97316" />
-          <Text className="text-sm font-bold text-orange-500">
-            {streak.currentStreak} dias
-          </Text>
-        </View>
-      </View>
+  const scheme = useColorScheme()
+  const isDark = scheme === 'dark'
 
-      <View className="flex-row justify-between">
+  return (
+    <View style={{
+      backgroundColor: isDark ? '#24242c' : '#ffffff',
+      borderRadius: 16, padding: 16,
+      borderWidth: 1, borderColor: isDark ? '#2a2a32' : '#e4e4e7',
+      flexDirection: 'row', alignItems: 'center', gap: 8,
+    }}>
+      {/* Days grid */}
+      <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between' }}>
         {streak.weekActivity.map((active, i) => (
-          <View key={i} className="items-center gap-1">
-            <View
-              className={`w-8 h-8 rounded-full items-center justify-center ${
-                active
-                  ? 'bg-accent-500'
-                  : 'bg-[#f3f4f6] dark:bg-[#2e2e38]'
-              }`}
-            >
-              {active && <Text className="text-xs text-white font-bold">✓</Text>}
+          <View key={i} style={{ alignItems: 'center', gap: 4 }}>
+            <View style={{
+              width: 34, height: 34, borderRadius: 17,
+              backgroundColor: active ? '#14b8a6' : (isDark ? '#2e2e38' : '#f3f4f6'),
+              alignItems: 'center', justifyContent: 'center',
+            }}>
+              {active && <Text style={{ color: '#fff', fontSize: 13, fontWeight: '700' }}>✓</Text>}
             </View>
-            <Text className="text-xs text-[#71717a] dark:text-[#8b8b98]">{DAY_LABELS[i]}</Text>
+            <Text style={{ fontSize: 10, color: isDark ? '#8b8b98' : '#71717a' }}>
+              {DAY_LABELS[i]}
+            </Text>
           </View>
         ))}
+      </View>
+
+      {/* Streak count */}
+      <View style={{ alignItems: 'center', gap: 2, paddingLeft: 8, borderLeftWidth: 1, borderLeftColor: isDark ? '#2a2a32' : '#e4e4e7' }}>
+        <Flame size={22} color="#f97316" fill="#f97316" />
+        <Text style={{ fontSize: 16, fontWeight: '800', color: isDark ? '#f4f4f5' : '#09090b' }}>
+          {streak.currentStreak}
+        </Text>
+        <Text style={{ fontSize: 10, color: isDark ? '#8b8b98' : '#71717a', textAlign: 'center' }}>
+          dias{'\n'}seguidos
+        </Text>
       </View>
     </View>
   )

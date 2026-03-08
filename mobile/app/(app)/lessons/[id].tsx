@@ -63,13 +63,22 @@ export default function LessonPlayer() {
     }
   }, [])
 
+  const goBackToPath = () => {
+    const pathSlug = lesson?.path?.slug ?? lessonData?.path?.slug
+    if (pathSlug) {
+      router.replace(`/(app)/paths/${pathSlug}`)
+    } else {
+      router.replace('/(app)/paths/')
+    }
+  }
+
   const handleExit = () => {
     Alert.alert(
       'Sair da lição?',
       'Seu progresso nesta lição não será salvo.',
       [
         { text: 'Cancelar', style: 'cancel' },
-        { text: 'Sair', style: 'destructive', onPress: () => router.back() },
+        { text: 'Sair', style: 'destructive', onPress: goBackToPath },
       ]
     )
   }
@@ -98,11 +107,17 @@ export default function LessonPlayer() {
       updateUser({ xp: result.newXp, level: result.newLevel, coins: undefined })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['path'] })
+      advanceStep() // transitions playerStatus → 'complete', revealing LessonComplete screen
     }
   }
 
   const handleBack = () => {
-    router.back()
+    const pathSlug = lesson?.path?.slug ?? lessonData?.path?.slug
+    if (pathSlug) {
+      router.replace(`/(app)/paths/${pathSlug}`)
+    } else {
+      router.replace('/(app)/paths/')
+    }
   }
 
   const currentStep = steps[currentStepIndex]
