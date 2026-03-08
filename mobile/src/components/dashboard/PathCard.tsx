@@ -1,8 +1,9 @@
 import React from 'react'
-import { View, Text, TouchableOpacity } from 'react-native'
-import { useColorScheme } from 'react-native'
+import { View, Text, Pressable, useColorScheme } from 'react-native'
+import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated'
 import { Lock } from 'lucide-react-native'
 import * as LucideIcons from 'lucide-react-native'
+import * as Haptics from 'expo-haptics'
 import { CompletionRing } from '../progress/CompletionRing'
 import { pathColors } from '../../constants/colors'
 import type { LearningPath } from '../../types'
@@ -13,10 +14,7 @@ interface PathCardProps {
 }
 
 function toPascalCase(str: string) {
-  return str
-    .split('-')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join('')
+  return str.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join('')
 }
 
 function DynamicIcon({ name, color, size }: { name: string; color: string; size: number }) {
@@ -26,57 +24,91 @@ function DynamicIcon({ name, color, size }: { name: string; color: string; size:
 }
 
 export function PathCard({ path, onPress }: PathCardProps) {
-  const scheme = useColorScheme()
-  const isDark = scheme === 'dark'
+  const isDark = useColorScheme() === 'dark'
   const colorSet = pathColors[path.colorToken] ?? pathColors.teal
+  const iconColor = isDark ? colorSet.darkText : colorSet.text
+  const accentBg = isDark ? colorSet.darkBg : colorSet.bg
+
+  const scale = useSharedValue(1)
+  const cardStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }))
 
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={onPress}
-      activeOpacity={0.8}
-      className="bg-white dark:bg-[#24242c] rounded-2xl border border-[#e4e4e7] dark:border-[#2a2a32] p-4 flex-row items-center gap-3"
+      onPressIn={() => {
+        scale.value = withSpring(0.97, { damping: 20, stiffness: 400 })
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+      }}
+      onPressOut={() => { scale.value = withSpring(1, { damping: 15 }) }}
     >
-      {/* Icon */}
-      <View
-        className="w-12 h-12 rounded-xl items-center justify-center"
-        style={{ backgroundColor: isDark ? colorSet.darkBg : colorSet.bg }}
-      >
-        {path.isPremium ? (
-          <Lock size={20} color={isDark ? colorSet.darkText : colorSet.text} />
-        ) : (
-          <DynamicIcon
-            name={path.iconName}
-            color={isDark ? colorSet.darkText : colorSet.text}
-            size={20}
-          />
-        )}
-      </View>
-
-      {/* Content */}
-      <View className="flex-1">
-        <View className="flex-row items-center gap-2 mb-0.5">
-          <Text className="text-base font-semibold text-[#09090b] dark:text-[#f4f4f5]" numberOfLines={1}>
-            {path.title}
-          </Text>
-          {path.isPremium && (
-            <View className="bg-amber-100 dark:bg-amber-900 px-1.5 py-0.5 rounded">
-              <Text className="text-xs font-bold text-amber-600 dark:text-amber-300">PRO</Text>
-            </View>
-          )}
+      <Animated.View style={[cardStyle, {
+        backgroundColor: isDark ? '#24242c' : '#ffffff',
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: isDark ? '#2a2a32' : '#e4e4e7',
+        // Left accent stripe
+        borderLeftWidth: 5,
+        borderLeftColor: iconColor,
+        padding: 14,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        // Elevation
+        shadowColor: iconColor,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: isDark ? 0 : 0.12,
+        shadowRadius: 6,
+        elevation: isDark ? 0 : 3,
+      }]}>
+        {/* Icon circle */}
+        <View style={{
+          width: 48, height: 48, borderRadius: 14,
+          backgroundColor: accentBg,
+          alignItems: 'center', justifyContent: 'center',
+        }}>
+          {path.isPremium
+            ? <Lock size={20} color={iconColor} />
+            : <DynamicIcon name={path.iconName} color={iconColor} size={20} />
+          }
         </View>
-        <Text className="text-xs text-[#71717a] dark:text-[#8b8b98]">
-          {path.completedLessons}/{path.totalLessons} lições
-        </Text>
-      </View>
 
-      {/* Ring */}
-      <CompletionRing
-        pct={path.completionPct}
-        size={40}
-        stroke={3}
-        color={isDark ? colorSet.darkText : colorSet.text}
-        trackColor={isDark ? '#2a2a32' : '#e4e4e7'}
-      />
-    </TouchableOpacity>
+        {/* Content */}
+        <View style={{ flex: 1 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+            <Text style={{
+              fontSize: 15, fontWeight: '800', letterSpacing: -0.2,
+              color: isDark ? '#f4f4f5' : '#09090b', flex: 1,
+            }} numberOfLines={1}>
+              {path.title}
+            </Text>
+            {path.isPremium && (
+              <View style={{ backgroundColor: '#fef3c7', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
+                <Text style={{ fontSize: 10, fontWeight: '800', color: '#b45309' }}>PRO</Text>
+              </View>
+            )}
+          </View>
+          <Text style={{ fontSize: 12, color: isDark ? '#8b8b98' : '#71717a' }}>
+            {path.completedLessons}/{path.totalLessons} lições concluídas
+          </Text>
+
+          {/* Mini progress bar */}
+          <View style={{ height: 4, backgroundColor: isDark ? '#2a2a32' : '#e4e4e7', borderRadius: 999, marginTop: 8 }}>
+            <View style={{
+              height: '100%', width: `${path.completionPct}%`,
+              backgroundColor: iconColor, borderRadius: 999,
+            }} />
+          </View>
+        </View>
+
+        {/* Ring */}
+        <CompletionRing
+          pct={path.completionPct}
+          size={44}
+          stroke={4}
+          color={iconColor}
+          trackColor={isDark ? '#2a2a32' : '#e4e4e7'}
+        />
+      </Animated.View>
+    </Pressable>
   )
 }

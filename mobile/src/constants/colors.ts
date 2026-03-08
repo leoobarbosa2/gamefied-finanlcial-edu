@@ -44,6 +44,24 @@ export const darkColors = {
 export type ColorTokens = typeof lightColors
 
 // Path color token mapping (for path cards)
+// Gamification tokens (Duolingo-style)
+export const gameColors = {
+  xpFill:         '#14b8a6',   // teal — XP bar fill
+  xpGlow:         '#5eead4',   // teal light — XP bar glow
+  streakFire:     '#f97316',   // orange — streak flame
+  streakFireGlow: '#fed7aa',   // peach — flame halo
+  coinGold:       '#f59e0b',   // amber — coin
+  coinGoldLight:  '#fef3c7',   // amber light — coin bg
+  levelShield:    '#6366f1',   // indigo — level badge
+  levelShieldEnd: '#4f46e5',   // indigo dark — gradient end
+  levelBorder:    '#f59e0b',   // amber — level badge border
+  correct:        '#22c55e',   // green — correct answer
+  incorrect:      '#ef4444',   // red — wrong answer
+  confetti:       ['#14b8a6', '#f59e0b', '#6366f1', '#22c55e', '#f97316', '#ffffff'],
+  shadowTeal:     'rgba(20,184,166,0.4)',
+  shadowDark:     'rgba(0,0,0,0.25)',
+}
+
 export const pathColors: Record<string, { bg: string; text: string; darkBg: string; darkText: string }> = {
   teal:   { bg: '#f0fdfa', text: '#0d9488', darkBg: '#134e4a', darkText: '#5eead4' },
   indigo: { bg: '#eef2ff', text: '#4f46e5', darkBg: '#1e1b4b', darkText: '#a5b4fc' },
