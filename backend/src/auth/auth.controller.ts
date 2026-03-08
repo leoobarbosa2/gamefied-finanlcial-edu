@@ -14,7 +14,8 @@ export class AuthController {
   async register(@Body() dto: RegisterDto, @Res({ passthrough: true }) res: Response) {
     const result = await this.authService.register(dto)
     this.setRefreshCookie(res, result.refreshToken)
-    return { user: result.user, accessToken: result.accessToken }
+    // refreshToken also returned in body for mobile clients (Set-Cookie filtered by iOS/Android)
+    return { user: result.user, accessToken: result.accessToken, refreshToken: result.refreshToken }
   }
 
   @Post('login')
@@ -22,16 +23,22 @@ export class AuthController {
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const result = await this.authService.login(dto)
     this.setRefreshCookie(res, result.refreshToken)
-    return { user: result.user, accessToken: result.accessToken }
+    // refreshToken also returned in body for mobile clients (Set-Cookie filtered by iOS/Android)
+    return { user: result.user, accessToken: result.accessToken, refreshToken: result.refreshToken }
   }
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refresh(@Req() req: { cookies: { refresh_token?: string } }, @Res({ passthrough: true }) res: Response) {
-    const refreshToken = req.cookies['refresh_token']
-    const tokens = this.authService.refreshTokens(refreshToken ?? '')
+  async refresh(
+    @Req() req: { cookies: { refresh_token?: string } },
+    @Body() body: { refreshToken?: string },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    // Cookie for web, body for mobile (Set-Cookie filtered by iOS/Android OS)
+    const refreshToken = req.cookies['refresh_token'] ?? body.refreshToken ?? ''
+    const tokens = this.authService.refreshTokens(refreshToken)
     this.setRefreshCookie(res, tokens.refreshToken)
-    return { accessToken: tokens.accessToken }
+    return { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken }
   }
 
   @Post('logout')

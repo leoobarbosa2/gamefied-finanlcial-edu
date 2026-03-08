@@ -105,16 +105,20 @@ export function Button({
   const showShadow = variant !== 'ghost' && !isDisabled
 
   return (
-    <View style={[fullWidth && { width: '100%' }, isDisabled && { opacity: 0.5 }]}>
-      {/* 3D shadow base */}
+    <View style={[
+      fullWidth && { width: '100%' },
+      isDisabled && { opacity: 0.5 },
+      showShadow && { paddingBottom: SHADOW_HEIGHT },
+    ]}>
+      {/* 3D shadow base — sits exactly behind the button, never overflows above */}
       {showShadow && (
         <View
           style={{
             position: 'absolute',
-            bottom: 0,
+            top: SHADOW_HEIGHT,
             left: 0,
             right: 0,
-            height: radius * 2 + padding.paddingVertical * 2 + 20, // approx button height
+            bottom: 0,
             backgroundColor: shadow,
             borderRadius: radius,
           }}

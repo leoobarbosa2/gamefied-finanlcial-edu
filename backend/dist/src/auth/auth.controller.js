@@ -27,18 +27,18 @@ let AuthController = class AuthController {
     async register(dto, res) {
         const result = await this.authService.register(dto);
         this.setRefreshCookie(res, result.refreshToken);
-        return { user: result.user, accessToken: result.accessToken };
+        return { user: result.user, accessToken: result.accessToken, refreshToken: result.refreshToken };
     }
     async login(dto, res) {
         const result = await this.authService.login(dto);
         this.setRefreshCookie(res, result.refreshToken);
-        return { user: result.user, accessToken: result.accessToken };
+        return { user: result.user, accessToken: result.accessToken, refreshToken: result.refreshToken };
     }
-    async refresh(req, res) {
-        const refreshToken = req.cookies['refresh_token'];
-        const tokens = this.authService.refreshTokens(refreshToken ?? '');
+    async refresh(req, body, res) {
+        const refreshToken = req.cookies['refresh_token'] ?? body.refreshToken ?? '';
+        const tokens = this.authService.refreshTokens(refreshToken);
         this.setRefreshCookie(res, tokens.refreshToken);
-        return { accessToken: tokens.accessToken };
+        return { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
     }
     logout(res) {
         res.clearCookie('refresh_token');
@@ -79,9 +79,10 @@ __decorate([
     (0, common_1.Post)('refresh'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Res)({ passthrough: true })),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "refresh", null);
 __decorate([

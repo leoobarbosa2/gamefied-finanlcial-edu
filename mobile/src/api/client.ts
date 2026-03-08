@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { getAccessToken, getRefreshToken, setAccessToken, clearTokens } from '../store/authStore'
+import { getAccessToken, getRefreshToken, setAccessToken, setRefreshToken, clearTokens } from '../store/authStore'
 
 const client = axios.create({
   baseURL: process.env.EXPO_PUBLIC_API_URL ?? 'http://10.0.2.2:3000/api/v1',
@@ -8,12 +8,15 @@ const client = axios.create({
   // withCredentials not needed — cookies are handled manually via SecureStore
 })
 
-// Attach access token from SecureStore to every request
+// Request logger
 client.interceptors.request.use(async (config) => {
   const token = await getAccessToken()
   if (token) config.headers.Authorization = `Bearer ${token}`
+  console.log(`[API] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`)
   return config
 })
+
+// Response logger (added below in response interceptor)
 
 // On 401, try to refresh the token once
 let isRefreshing = false
@@ -28,10 +31,14 @@ const processQueue = (error: unknown, token: string | null = null) => {
 }
 
 client.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log(`[API] ${response.status} ${response.config.url}`)
+    return response
+  },
   async (error) => {
+    console.warn(`[API] ERR ${error.response?.status ?? 'TIMEOUT'} ${error.config?.url} —`, error.message)
     const originalRequest = error.config
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest?._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject })
@@ -50,15 +57,16 @@ client.interceptors.response.use(
         const refreshToken = await getRefreshToken()
         if (!refreshToken) throw new Error('No refresh token')
 
-        // Manually add Cookie header — the key workaround for HttpOnly cookies in React Native
-        const { data } = await client.post<{ data: { accessToken: string } }>(
+        // Send refresh token in body — Set-Cookie is filtered by iOS/Android OS layers
+        const { data } = await client.post<{ data: { accessToken: string; refreshToken: string } }>(
           '/auth/refresh',
-          {},
-          { headers: { Cookie: `refresh_token=${refreshToken}` } }
+          { refreshToken },
         )
 
         const newToken = data.data.accessToken
         await setAccessToken(newToken)
+        // Rotate refresh token too
+        if (data.data.refreshToken) await setRefreshToken(data.data.refreshToken)
         client.defaults.headers.common.Authorization = `Bearer ${newToken}`
         processQueue(null, newToken)
         originalRequest.headers.Authorization = `Bearer ${newToken}`

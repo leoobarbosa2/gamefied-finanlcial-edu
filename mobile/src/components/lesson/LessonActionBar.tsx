@@ -34,7 +34,7 @@ export function LessonActionBar({
   const showComplete = (step.stepType !== 'QUIZ' || isAnswered) && isLastStep
 
   return (
-    <View className="px-5 pb-6 pt-3 bg-white dark:bg-[#1c1c22] border-t border-[#e4e4e7] dark:border-[#2a2a32]">
+    <View className="px-4 py-3 bg-white dark:bg-[#1c1c22] border-t border-[#e4e4e7] dark:border-[#2a2a32]">
       {showVerify && (
         <Button
           variant="primary"

@@ -8,7 +8,6 @@ export declare class AuthController {
     register(dto: RegisterDto, res: Response): Promise<{
         user: {
             id: string;
-            createdAt: Date;
             email: string;
             displayName: string;
             dailyGoalMins: number;
@@ -17,8 +16,10 @@ export declare class AuthController {
             xp: number;
             level: number;
             coins: number;
+            createdAt: Date;
         };
         accessToken: string;
+        refreshToken: string;
     }>;
     login(dto: LoginDto, res: Response): Promise<{
         user: {
@@ -34,13 +35,17 @@ export declare class AuthController {
             coins: number;
         };
         accessToken: string;
+        refreshToken: string;
     }>;
     refresh(req: {
         cookies: {
             refresh_token?: string;
         };
+    }, body: {
+        refreshToken?: string;
     }, res: Response): Promise<{
         accessToken: string;
+        refreshToken: string;
     }>;
     logout(res: Response): {
         message: string;
@@ -49,7 +54,6 @@ export declare class AuthController {
         id: string;
     }): Promise<{
         id: string;
-        createdAt: Date;
         email: string;
         displayName: string;
         avatarUrl: string | null;
@@ -59,6 +63,7 @@ export declare class AuthController {
         xp: number;
         level: number;
         coins: number;
+        createdAt: Date;
         streak: {
             currentStreak: number;
             longestStreak: number;
