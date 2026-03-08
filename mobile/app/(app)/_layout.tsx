@@ -7,17 +7,19 @@ import { useAuthStore } from '../../src/store/authStore'
 export default function AppLayout() {
   const router = useRouter()
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const hasHydrated     = useAuthStore((s) => s._hasHydrated)
   const scheme = useColorScheme()
 
   useEffect(() => {
+    if (!hasHydrated) return
     if (!isAuthenticated) {
       router.replace('/(auth)/login')
     }
-  }, [isAuthenticated])
+  }, [isAuthenticated, hasHydrated])
 
-  const tabBarBg = scheme === 'dark' ? '#1c1c22' : '#ffffff'
+  const tabBarBg     = scheme === 'dark' ? '#1c1c22' : '#ffffff'
   const tabBarBorder = scheme === 'dark' ? '#2a2a32' : '#e4e4e7'
-  const activeColor = '#14b8a6'
+  const activeColor  = '#14b8a6'
   const inactiveColor = scheme === 'dark' ? '#8b8b98' : '#71717a'
 
   return (
@@ -59,9 +61,7 @@ export default function AppLayout() {
       />
       <Tabs.Screen
         name="lessons"
-        options={{
-          href: null, // Hide from tab bar
-        }}
+        options={{ href: null }}
       />
     </Tabs>
   )
